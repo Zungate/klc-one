@@ -1,0 +1,32 @@
+﻿ @{
+    if ((Model.ExternalLogins?.Count ?? 0) == 0)
+    {
+        <div>
+            <p>
+                There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
+                for details on setting up this ASP.NET application to support logging in via external services.
+            </p>
+        </div>
+    }
+    else
+    {
+        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+
+            @foreach (var provider in Model.ExternalLogins)
+            {
+                @if (provider.Name == "Google")
+                {
+                    <button type="submit" class="btn btn-pill btn-outline-gray-500 me-2" value="@provider.Name" title="Log in using your @provider.DisplayName account" name="provider">
+                        <img src="/image/google-logo.svg" class="feather-24" />Google
+                    </button>
+                }
+                else if (provider.Name == "Facebook")
+                {
+                    <button class="btn btn-pill btn-outline-gray-500 me-2" type="submit" value="@provider.Name" title="Log in using your @provider.DisplayName account" name="provider">
+                        <i class="feather-16" data-feather="facebook"></i>Facebook
+                    </button>
+                }
+            }
+        </form>
+    }
+}

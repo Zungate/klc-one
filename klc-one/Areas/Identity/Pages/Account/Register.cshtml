@@ -1,0 +1,66 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<form asp-route-returnUrl="@Model.ReturnUrl" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <!-- Form Group-->
+    <div class="form-group mb-4">
+        <label asp-for="Input.Email"></label>
+        <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">
+                <i class="feather-16" data-feather="mail"></i>
+            </span>
+            <input asp-for="Input.Email" class="form-control" placeholder="Email@domain.com" autofocus />
+        </div>
+        <span asp-validation-for="Input.Email" class="text-danger"></span>
+    </div>
+    <!-- End Form Group-->
+    <!-- Form Group-->
+    <div class="form-group mb-4">
+        <label asp-for="Input.Password"></label>
+        <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">
+                <i class="feather-16" data-feather="lock"></i>
+            </span>
+            <input asp-for="Input.Password" class="form-control" />
+        </div>
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+    </div>
+    <!-- End Form Group-->
+    <!-- Form Group-->
+    <div class="form-group mb-4">
+        <label asp-for="Input.ConfirmPassword"></label>
+        <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">
+                <i class="feather-16" data-feather="lock"></i>
+            </span>
+            <input asp-for="Input.ConfirmPassword" class="form-control" />
+        </div>
+        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+    </div>
+    <!-- End Form Group-->
+    <div class="d-grid">
+        <button type="submit" class="btn btn-gray-800">Sign up</button>
+    </div>
+</form>
+<!-- External Logins-->
+<div class="mt-3 mb-4 text-center">
+    <span class="fw-normal">or login with</span>
+</div>
+<div class="d-flex justify-content-center my-4">
+    @await Html.PartialAsync("~/Views/Partials/_ExternalLogins.cshtml")
+</div>
+<!-- Register -->
+<div class="d-flex justify-content-center align-items-center mt-4">
+    <span class="fw-normal">
+        Already have an account?
+        <a href="/Identity/Account/Login" class="fw-bold">Login Here</a>
+    </span>
+</div>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+}

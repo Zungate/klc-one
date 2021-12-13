@@ -1,0 +1,21 @@
+﻿<nav aria-label="breadcrumb">
+    <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent mb-0">
+        @{
+            string controllerName = ViewContext.RouteData.Values["controller"].ToString();
+            string actionName = ViewContext.RouteData.Values["action"].ToString();
+
+            <li class="breadcrumb-item">
+                <a href="/">Hjem</a>
+            </li>
+            if (controllerName != "Home")
+            {
+                <li class="breadcrumb-item">@Html.ActionLink(controllerName, "Index")</li>
+                @if (actionName != "Index")
+                {
+                    <li class="breadcrumb-item active" aria-current="page">@actionName</li>
+                }
+            }
+        }
+    </ol>
+</nav>
+

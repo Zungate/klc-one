@@ -1,0 +1,49 @@
+﻿<div class="row mb-4">
+    <div class="col-12">
+        <div class="form-group">
+            <form method="get">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="feather-16" data-feather="search"></i></span>
+                    <input type="text" class="form-control" name="search" id="search" placeholder="Søg" value="@Model.Search" aria-label="Søg" />
+                    <input type="submit" value="Søg" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col-sm-8">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="sr-only">Status</span>
+                <i class="feather-16" data-feather="chevron-down"></i>
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" asp-action="Index">Alle</a>
+                <a class="dropdown-item" asp-action="Index" asp-route-filter="deleted">Slettede</a>
+                <a class="dropdown-item" asp-action="Index" asp-route-filter="nonDeleted">Ikke slettede</a>
+            </div>
+        </div>
+        @if (Model.Categories != null)
+        {
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="sr-only">Kategori</span>
+                    <i class="feather-16" data-feather="chevron-down"></i>
+                </button>
+
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" asp-action="Index">Alle</a>
+                    @foreach (var item in Model.Categories)
+                    {
+                        <a class="dropdown-item" asp-action="Index" asp-route-search="@item.Name">@item.Name</a>
+                    }
+                </div>
+
+            </div>
+        }
+    </div>
+    <div class="col-sm-4 d-flex flex-row-reverse">
+        <a asp-action="Create" class="btn btn-primary">Opret ny</a>
+    </div>
+</div>

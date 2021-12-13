@@ -1,0 +1,34 @@
+﻿@model klc_one.Areas.FoodPlan.Models.DishIngredient
+
+<h4>Tilføj ingrediens til @ViewBag.Dish.Name</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddIngredientToDish">
+
+            @Html.Hidden("DishID", (object)ViewBag.Dish.Id)
+            <div class="form-group">
+                <label class="control-label">Ingrediens</label>
+                <input asp-for="IngredientID" class="form-control" list="Ingredients" />
+                <datalist id="Ingredients">
+                    @foreach (var item in ViewBag.Ingredients)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </datalist>
+            </div>
+            <div class="form-group">
+                <label asp-for="Amount" class="control-label"></label>
+                <input asp-for="Amount" class="form-control" />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Unit" class="control-label"></label>
+                <select asp-for="Unit" class="form-control" asp-items="ViewBag.Units"></select>
+            </div>
+            <div class="form-group">
+                @await Html.PartialAsync("~/Views/Partials/Forms/_CreateSubmit.cshtml")
+            </div>
+        </form>
+    </div>
+</div>

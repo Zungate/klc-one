@@ -1,0 +1,21 @@
+﻿@using System.Globalization
+@model klc_one.Areas.FoodPlan.Models.Plan
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<h4>Uge @Model.Week - @Model.Year</h4>
+<div class="list-group">
+    @foreach (var item in @Model.DishPlans)
+    {
+        <a asp-area="FoodPlan" asp-controller="Dishes" asp-action="Details" class="list-group-item list-group-item-action @(@item.Dish.DeletedAt != null ? "list-group-item-danger" : "")" aria-current="true" asp-route-id="@item.Dish.Id">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">
+                    @item.DayOfWeek
+                </h5>
+            </div>
+            <p class="mb-1 text-info">@item.Dish.Name</p>
+        </a>
+    }
+</div>

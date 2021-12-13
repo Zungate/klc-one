@@ -1,0 +1,58 @@
+﻿@model klc_one.Areas.FoodPlan.Models.Dish
+
+@{
+    ViewData["Title"] = @Model.Name;
+}
+<div>
+    <hr />
+    <div class="accordion" id="accordionDetails">
+        <!-- Beskrivelse -->
+        <div class="accordion-item">
+            <h2 class="accordion-header bg-primary text-white" id="descriptionHeader">
+                <button class="accordion-button bg-primary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#description" aria-expanded="true" aria-controls="description">
+                    Beskrivelse
+                </button>
+            </h2>
+            <div id="description" class="accordion-collapse collapse show" aria-labelledby="descriptionHeader">
+                <div class="accordion-body">
+                    @Html.DisplayFor(modelItem => Model.Description)
+                </div>
+            </div>
+        </div>
+        <!-- Ingredienser -->
+        <div class="accordion-item">
+            <h2 class="accordion-header bg-primary text-white" id="ingredientsHeader">
+                <button class="accordion-button bg-primary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#ingredients" aria-expanded="true" aria-controls="ingredients">
+                    Ingredienser
+                </button>
+            </h2>
+            <div id="ingredients" class="accordion-collapse collapse show" aria-labelledby="ingredientsHeader">
+                <div class="accordion-body">
+                    <ul>
+                        @foreach (var item in @Model.DishIngredients)
+                        {
+                            <li>@item.Amount @item.Unit - @item.Ingredient.Name</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Fremgangsmåde -->
+        <div class="accordion-item">
+            <h2 class="accordion-header bg-primary text-white" id="procedureHeader">
+                <button class="accordion-button bg-primary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#procedure" aria-expanded="true" aria-controls="procedure">
+                    Fremgangsmåde
+                </button>
+            </h2>
+            <div id="procedure" class="accordion-collapse collapse show" aria-labelledby="procedureHeader">
+                <div class="accordion-body">
+                    @Html.DisplayFor(modelItem => Model.Procedure)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@await Html.PartialAsync("~/Views/Partials/Forms/_DetailsFooter.cshtml", Model)

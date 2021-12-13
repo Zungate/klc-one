@@ -1,0 +1,42 @@
+﻿@if (Model.TotalPages > 1)
+{
+    <ul class="pagination">
+        <li class="page-item @(!Model.ShowFirst? "disabled":"")">
+            <a asp-action="Index" asp-route-page="1" class="page-link"><i data-feather="chevrons-left" class="feather-16"></i></a>
+        </li>
+
+        <li class="page-item @(!Model.ShowPrevious? "disabled":"")">
+            <a asp-action="Index" asp-area="FoodPlan" asp-route-page="@(Model.PageIndex -1)" class="page-link"><i data-feather="chevron-left" class="feather-16"></i></a>
+        </li>
+
+        @*Always show first page*@
+        <li class="page-item @(Model.PageIndex == 1 ? "active" : "")">
+            <a asp-action="Index" asp-area="FoodPlan" asp-route-page="1" class="page-link">1</a>
+        </li>
+
+        <!-- Loop through pages -->
+        @for (var i = Model.PageIndex - 5; i <= Model.PageIndex + 5; i++)
+        {
+            if (i > 1 && i < Model.TotalPages)
+            {
+                <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                    <a asp-action="Index" asp-area="FoodPlan" asp-route-page="@i" class="page-link">@i</a>
+                </li>
+            }
+        }
+
+        @*Always show last page*@
+        <li class="page-item @(Model.PageIndex == Model.TotalPages ? "active" : "")">
+            <a asp-action="Index" asp-area="FoodPlan" asp-route-page="@Model.TotalPages" class="page-link">@Model.TotalPages</a>
+        </li>
+
+
+        <li class="page-item  @(!Model.ShowNext? "disabled":"")">
+            <a asp-action="Index" asp-area="FoodPlan" asp-route-page="@(Model.PageIndex + 1)" class="page-link"><i data-feather="chevron-right" class="feather-16"></i></a>
+        </li>
+
+        <li class="page-item  @(!Model.ShowLast? "disabled":"")">
+            <a asp-action="Index" asp-area="FoodPlan" asp-route-page="@Model.TotalPages" class="page-link"><i data-feather="chevrons-right" class="feather-16"></i></a>
+        </li>
+    </ul>
+}

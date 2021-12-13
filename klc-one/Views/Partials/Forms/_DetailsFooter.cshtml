@@ -1,0 +1,11 @@
+﻿<div class="my-2">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Rediger</a>
+    <a asp-action="Index" class="btn btn-white">Tilbage</a>
+</div>
+
+<hr />
+<small class="text-muted">Oprettet: @Model.CreatedAt, sidst redigeret: @Model.UpdatedAt </small>
+    @if (Model.DeletedAt != null)
+{
+    <small class="subtitle text-muted">Arkiveret: @Model.DeletedAt </small>
+}

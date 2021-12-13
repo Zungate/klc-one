@@ -1,0 +1,10 @@
+﻿<a asp-action="Edit" class="mx-2" asp-route-id="@Model.Id"><i data-feather="edit" class="text-warning feather-16" data-bs-toggle="tooltip" data-bs-placement="top" title="Rediger"></i></a>
+<a asp-action="Details" class="mx-2" asp-route-id="@Model.Id"><i data-feather="info" class="text-info feather-16" data-bs-toggle="tooltip" data-bs-placement="top" title="Detaljer"></i></a>
+<a asp-action="ActiveStatus" class="mx-2" asp-route-id="@Model.Id">
+    @{
+        var iconClass = Model.DeletedAt == null ? "minus" : "check";
+        var iconColor = Model.DeletedAt == null ? "danger" : "success";
+        <i data-feather="@iconClass-circle" class="text-@iconColor feather-16" data-bs-toggle="tooltip" data-bs-placement="top" title="Toggle Active Status"></i>
+    }
+</a>
+
