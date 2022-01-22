@@ -1,21 +1,125 @@
 ﻿@using System.Globalization
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject IAuthorizationService AuthorizationService
+@inject SignInManager<AppUser> SignInManager
+
 @model klc_one.Areas.FoodPlan.Models.Plan
 
 @{
     ViewData["Title"] = "Home Page";
 }
 
-<h4>Uge @Model.Week - @Model.Year</h4>
-<div class="list-group">
-    @foreach (var item in @Model.DishPlans)
-    {
-        <a asp-area="FoodPlan" asp-controller="Dishes" asp-action="Details" class="list-group-item list-group-item-action @(@item.Dish.DeletedAt != null ? "list-group-item-danger" : "")" aria-current="true" asp-route-id="@item.Dish.Id">
-            <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">
-                    @item.DayOfWeek
-                </h5>
-            </div>
-            <p class="mb-1 text-info">@item.Dish.Name</p>
-        </a>
-    }
+<div class="row">
+    <div class="col-sm-12">
+        <div class="bg-white shadow border-0 rounded border-light p-4">
+
+            <table class="table table-borderless table-responsive caption-top ">
+                <tr>
+                    <td>
+                        @if (Model != null)
+                        {
+                            <div>Uge @Model.Week - @Model.Year</div>
+                        }
+                    </td>
+                    <td></td>
+                    @if ((await AuthorizationService.AuthorizeAsync(User, "FoodAdmin")).Succeeded)
+                    {
+                        <td>Rediger: <input type="checkbox" id="editPlan"></td>
+                    }
+                </tr>
+                @if (Model != null)
+                {
+                    @foreach (var item in Model.DishPlans)
+                    {
+                        <tr>
+                            <td width="10%"><h5>@item.DayOfWeek</h5></td>
+
+                            @if (!string.IsNullOrEmpty(item.Comment))
+                            {
+                                <td>@item.Comment</td>
+                            }
+                            else if (!string.IsNullOrEmpty(item.DishID.ToString()))
+                            {
+
+                                <td width="40%" class="@(@item.Dish.DeletedAt != null ? "table-danger" : "")">
+                                    <a asp-area="FoodPlan" asp-controller="Dishes" asp-action="Details" asp-route-id="@item.Dish.Id" class="highlight">
+                                        @item.Dish.Name
+                                    </a>
+                                </td>
+                            }
+                            else
+                            {
+                                <td width="40%"></td>
+                            }
+                            <td width="8%">
+                                <div class="actions">
+
+                                    @if (string.IsNullOrEmpty(item.DishID.ToString()))
+                                    {
+                                        <a asp-area="FoodPlan" asp-controller="DishPlans" asp-action="AddDish" class="mx-2" asp-route-Id="@item.Id">
+                                            <i data-feather="plus" class="text-primary feather-16" data-bs-toggle="tooltip" data-bs-placement="top" title="Tilføj ret"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-area="FoodPlan" asp-controller="DishPlans" asp-action="RemoveDish" class="mx-2" asp-route-Id="@item.Id">
+                                            <i data-feather="trash-2" class="text-danger feather-16" data-bs-toggle="tooltip" data-bs-placement="top" title="Fjern ret"></i>
+                                        </a>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.DishID.ToString()) || !string.IsNullOrEmpty(item.Comment))
+                                    {
+                                        <a asp-area="FoodPlan" asp-controller="DishPlans" asp-action="MoveDish" class="mx-2" asp-route-Id="@item.Id" asp-route-direction="up">
+                                            <i data-feather="arrow-up" class="text-info feather-16" data-bs-toggle="tooltip" data-bs-placement="top" title="Flyt ret op"></i>
+                                        </a>
+                                        <a asp-area="FoodPlan" asp-controller="DishPlans" asp-action="MoveDish" class="mx-2" asp-route-Id="@item.Id" asp-route-direction="down">
+                                            <i data-feather="arrow-down" class="text-info feather-16" data-bs-toggle="tooltip" data-bs-placement="top" title="Flyt ret ned"></i>
+                                        </a>
+
+                                    }
+                                </div>
+                            </td>
+                            @if ((await AuthorizationService.AuthorizeAsync(User, "FoodAdmin")).Succeeded)
+                            {
+                                <td width="8%">
+                                    <div class="actions">
+                                        @if (!string.IsNullOrEmpty(item.Comment))
+                                        {
+                                            <a asp-area="FoodPlan" asp-controller="DishPlans" asp-action="RemoveComment" class="mx-2" asp-route-Id="@item.Id" asp-route-direction="down">
+                                                <i data-feather="message-square" class="text-danger feather-16" data-bs-toggle="tooltip" data-bs-placement="top" title="Fjern kommentar"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-area="FoodPlan" asp-controller="DishPlans" asp-action="AddComment" class="mx-2" asp-route-Id="@item.Id">
+                                                <i data-feather="message-square" class="text-primary feather-16" data-bs-toggle="tooltip" data-bs-placement="top" title="Tilføj kommentar"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+                else
+                {
+                    @if ((await AuthorizationService.AuthorizeAsync(User, "FoodAdmin")).Succeeded)
+                    {
+                        <tr>
+                            <td colspan="5">
+                                <div class="d-grid gap-2 actions">
+                                    <a asp-area="FoodPlan" asp-controller="DishPlans" asp-action="AddEmptyWeek" class="mx-2 btn btn-primary">
+                                        Opret tom uge
+                                    </a>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </table>
+        </div>
+    </div>
 </div>
+
+

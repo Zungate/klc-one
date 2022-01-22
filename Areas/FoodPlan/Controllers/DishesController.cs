@@ -1,9 +1,10 @@
 ﻿using klc_one.Areas.FoodPlan.Models;
-using klc_one.Areas.FoodPlan.Models.ViewModels;
+using klc_one.Areas.FoodPlan.Models.DTO;
 using klc_one.Areas.FoodPlan.Repositories;
 using klc_one.Areas.FoodPlan.Repositories.Interfaces;
 using klc_one.Data;
 using klc_one.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,52 +12,54 @@ using Microsoft.EntityFrameworkCore;
 namespace klc_one.Areas.FoodPlan.Controllers;
 
 [Area("FoodPlan")]
+
 public class DishesController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly IConfiguration _configuration;
     private readonly IRepository<Dish> _repository;
     private readonly IDishRepository _dishRepository;
-    private readonly IDishIngredientRepository _dishIngredientRepository;
 
-    public DishesController(ApplicationDbContext context, IConfiguration configuration, IRepository<Dish> repository, IDishRepository dishRepository, IDishIngredientRepository dishIngredientRepository)
+    public DishesController(ApplicationDbContext context, IConfiguration configuration, IRepository<Dish> repository, IDishRepository dishRepository)
     {
         _context = context;
         _configuration = configuration;
         _repository = repository;
         _dishRepository = dishRepository;
-        _dishIngredientRepository = dishIngredientRepository;
     }
 
     // GET: FoodPlan/Dishes
+    [Authorize(Policy = "FoodUser")]
     public async Task<IActionResult> Index(string? search, int? page, string? filter)
     {
         var dishes = _dishRepository.GetAll();
 
-        dishes = _dishRepository.Search(dishes, search);
+        if (!string.IsNullOrEmpty(search))
+            dishes = _dishRepository.Search(dishes, search);
 
-        dishes = _repository.Filter(dishes, filter);
+        if (!string.IsNullOrEmpty(filter))
+            dishes = _repository.Filter(dishes, filter);
 
         var pageSize = _configuration.GetSection("Pagination").GetValue<int>("PageSize");
         ViewData["Categories"] = await _context.CategoryForDish.ToListAsync();
         ViewData["Search"] = search;
-        return View(PaginatedList<DishListingViewModel>.Create(await ConvertItemlistToViewModel(dishes), page ?? 1, pageSize));
+        return View(PaginatedList<DishListDTO>.Create(await ConvertItemlistToDTO(dishes), page ?? 1, pageSize));
     }
 
     // GET: FoodPlan/Dishes/Details/5
+    [Authorize(Policy = "FoodUser")]
     public async Task<IActionResult> Details(Guid id)
     {
         var dish = await _dishRepository.GetByIdAsync(id);
 
         if (dish == null)
-        {
             return RedirectToAction("Error404", "Error", new { area = "" });
-        }
 
         return View(dish);
     }
 
     // GET: FoodPlan/Dishes/Create
+    [Authorize(Policy = "FoodAdmin")]
     public IActionResult Create()
     {
         ViewData["CategoryForDishID"] = new SelectList(_context.CategoryForDish, "Id", "Name");
@@ -66,7 +69,8 @@ public class DishesController : Controller
     // POST: FoodPlan/Dishes/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Description,Procedure,DoNotUse,CategoryForDishID,Id,Name")] Dish dish)
+    [Authorize(Policy = "FoodAdmin")]
+    public async Task<IActionResult> Create([Bind("Description,Procedure,Comment,CategoryForDishID,Id,Name")] Dish dish)
     {
         if (ModelState.IsValid)
         {
@@ -80,6 +84,7 @@ public class DishesController : Controller
     }
 
     // GET: FoodPlan/Dishes/Edit/5
+    [Authorize(Policy = "FoodAdmin")]
     public async Task<IActionResult> Edit(Guid id)
     {
         var dish = await _dishRepository.GetByIdAsync(id);
@@ -94,7 +99,8 @@ public class DishesController : Controller
     // POST: FoodPlan/Dishes/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, [Bind("Description,Procedure,DoNotUse,CategoryForDishID,Id,Name")] Dish dish)
+    [Authorize(Policy = "FoodAdmin")]
+    public async Task<IActionResult> Edit(Guid id, [Bind("Description,Procedure,CategoryForDishID,Comment,Id,Name,DeletedAt")] Dish dish)
     {
         if (id != dish.Id)
         {
@@ -121,6 +127,7 @@ public class DishesController : Controller
         return View(dish);
     }
 
+    [Authorize(Policy = "FoodAdmin")]
     public async Task<IActionResult> ActiveStatus(Guid id)
     {
         var dish = await _dishRepository.GetByIdAsync(id);
@@ -139,21 +146,21 @@ public class DishesController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    private async Task<IQueryable<DishListingViewModel>> ConvertItemlistToViewModel(IQueryable<Dish> items)
+    private static async Task<IQueryable<DishListDTO>> ConvertItemlistToDTO(IQueryable<Dish> items)
     {
-        var viewmodelList = new List<DishListingViewModel>();
+        var dtos = new List<DishListDTO>();
         await items.ForEachAsync(item =>
         {
-            var viewmodel = new DishListingViewModel
+            var dto = new DishListDTO
             {
                 Id = item.Id,
                 Name = item.Name,
                 DeletedAt = item.DeletedAt,
                 Category = item.CategoryForDish.Name
             };
-            viewmodelList.Add(viewmodel);
+            dtos.Add(dto);
         });
-        return viewmodelList.AsQueryable();
+        return dtos.AsQueryable();
     }
 }
 

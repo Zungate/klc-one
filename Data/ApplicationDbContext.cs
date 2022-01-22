@@ -11,10 +11,10 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     public DbSet<Ingredient> Ingredient { get; set; }
     public DbSet<Dish> Dish { get; set; }
     public DbSet<DishIngredient> DishIngredient { get; set; }
-    public DbSet<DishComment> Comment { get; set; }
     public DbSet<Plan> Plan { get; set; }
     public DbSet<DishPlan> DishPlan { get; set; }
     public DbSet<Unit> Unit { get; set; }
+    public DbSet<ShoppingList> ShoppingList { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -32,8 +32,6 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
         builder.Entity<Unit>().HasIndex(i => i.Name).IsUnique();
 
 
-        //Dish plans
-        builder.Entity<DishPlan>().HasKey(dp => new { dp.DishID, dp.PlanID });
 
         //Setup many to many from Plan
         builder.Entity<DishPlan>()
@@ -70,10 +68,5 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
         builder.Entity<CategoryForDish>()
             .HasMany(d => d.Dishes)
             .WithOne(c => c.CategoryForDish);
-
-        //Setup Recipies and Comments
-        builder.Entity<Dish>()
-            .HasMany(r => r.Comments)
-            .WithOne(r => r.Dish);
     }
 }

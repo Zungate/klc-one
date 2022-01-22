@@ -106,5 +106,14 @@ public class Repository<T> : IRepository<T> where T : BaseModel
 
         return items;
     }
+
+    public IQueryable<T> Search(IQueryable<T> items, string search)
+    {
+        if (!String.IsNullOrEmpty(search))
+        {
+            items = items.Where(item => item.Name.Contains(search));
+        }
+        return items;
+    }
 }
 

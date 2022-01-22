@@ -1,0 +1,32 @@
+﻿@model IEnumerable<klc_one.Areas.FoodPlan.Models.DTO.BaseListDTO>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+@await Html.PartialAsync("~/Views/Partials/Forms/_IndexHeader.cshtml", new { Search = ViewData["Search"], Categories = ViewData["Categories"] } )
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="@(@item.DeletedAt != null ? "table-danger" : "")">
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @await Html.PartialAsync("~/Views/Partials/Forms/_IndexActions.cshtml", item)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@await Html.PartialAsync("~/Views/Partials/Forms/_IndexPagination.cshtml", Model)

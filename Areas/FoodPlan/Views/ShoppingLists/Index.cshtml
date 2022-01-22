@@ -1,0 +1,46 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject IAuthorizationService AuthorizationService
+@inject SignInManager<AppUser> SignInManager
+@model IEnumerable<klc_one.Areas.FoodPlan.Models.ShoppingList>
+@{
+    ViewData["Title"] = "Indkøbsliste";
+    Layout = "~/Views/Layouts/_DefaultLayout.cshtml";
+}
+@if ((await AuthorizationService.AuthorizeAsync(User, "FoodAdmin")).Succeeded)
+{
+    <div class="d-flex flex-row-reverse">
+        <a asp-action="Create" class="btn btn-primary">Tilføj ingrediens</a>
+    </div>
+}
+
+@foreach (var item in (List<CategoryForIngredient>?)ViewData["Categories"])
+{
+
+    <h4>@item.Name</h4>
+    <ul class="list-group list-group-flush mb-4">
+        @foreach (var shoppingListItem in @Model)
+        {
+            if (shoppingListItem.Category == item.Name)
+            {
+                <li class="list-group-item mb-1">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <input class="form-check-input me-1" type="checkbox">
+                            <label class="strikethrough">@shoppingListItem.Amount @shoppingListItem.Unit @shoppingListItem.Name</label>
+                        </div>
+                        <div>
+                            @await Html.PartialAsync("~/Areas/FoodPlan/Views/Partials/_ShoppingListActions.cshtml", shoppingListItem)
+                        </div>
+                    </div>
+                </li>
+            }
+        }
+    </ul>
+}
+@if ((await AuthorizationService.AuthorizeAsync(User, "FoodAdmin")).Succeeded)
+{
+    <a asp-action="SaveShoppingList" class="btn btn-lg btn-danger">Opret ny indkøbsseddel</a>
+}
+
+

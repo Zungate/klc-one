@@ -1,4 +1,8 @@
-﻿<div class="row mb-4">
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject IAuthorizationService AuthorizationService
+@inject SignInManager<AppUser> SignInManager
+<div class="row mb-4">
     <div class="col-12">
         <div class="form-group">
             <form method="get">
@@ -14,9 +18,8 @@
 <div class="row mb-4">
     <div class="col-sm-8">
         <div class="btn-group me-2">
-            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="sr-only">Status</span>
-                <i class="feather-16" data-feather="chevron-down"></i>
+            <button type="button" class="btn btn-warning dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Status
             </button>
             <div class="dropdown-menu">
                 <a class="dropdown-item" asp-action="Index">Alle</a>
@@ -27,9 +30,8 @@
         @if (Model.Categories != null)
         {
             <div class="btn-group me-2">
-                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button type="button" class="btn btn-warning dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="sr-only">Kategori</span>
-                    <i class="feather-16" data-feather="chevron-down"></i>
                 </button>
 
                 <div class="dropdown-menu">
@@ -43,7 +45,11 @@
             </div>
         }
     </div>
-    <div class="col-sm-4 d-flex flex-row-reverse">
-        <a asp-action="Create" class="btn btn-primary">Opret ny</a>
-    </div>
+    @if ((await AuthorizationService.AuthorizeAsync(User, "FoodAdmin")).Succeeded)
+    {
+        <div class="col-sm-4 d-flex flex-row-reverse">
+            <a asp-action="Create" class="btn btn-primary">Opret ny</a>
+        </div>
+    }
+
 </div>

@@ -2,12 +2,14 @@
 using klc_one.Areas.FoodPlan.Repositories;
 using klc_one.Areas.FoodPlan.Repositories.Interfaces;
 using klc_one.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace klc_one.Areas.FoodPlan.Controllers
 {
     [Area("FoodPlan")]
+    [Authorize(Policy = "FoodAdmin")]
     public class DishIngredientsController : Controller
     {
         private readonly ApplicationDbContext _context;

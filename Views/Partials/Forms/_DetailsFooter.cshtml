@@ -1,11 +1,19 @@
-﻿<div class="my-2">
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Rediger</a>
-    <a asp-action="Index" class="btn btn-white">Tilbage</a>
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject IAuthorizationService AuthorizationService
+@inject SignInManager<AppUser> SignInManager
+
+<div class="my-2">
+    @if ((await AuthorizationService.AuthorizeAsync(User, "FoodAdmin")).Succeeded)
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Rediger</a>
+    }
+    <a asp-action="Index" class="btn btn-white">Annuller</a>
 </div>
 
 <hr />
 <small class="text-muted">Oprettet: @Model.CreatedAt, sidst redigeret: @Model.UpdatedAt </small>
-    @if (Model.DeletedAt != null)
+@if (Model.DeletedAt != null)
 {
     <small class="subtitle text-muted">Arkiveret: @Model.DeletedAt </small>
 }

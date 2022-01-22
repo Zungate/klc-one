@@ -8,5 +8,6 @@ public interface IDishRepository
     public Task<Dish?> GetByIdAsync(Guid id);
     public IQueryable<Dish> Search(IQueryable<Dish> items, string search);
 
+
 }
 

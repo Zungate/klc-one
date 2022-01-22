@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Register";
 }
+        <div class="alert alert-warning">
+            Password skal være minimum 10 tegn og skal indeholde minimum 1 tal
+        </div>
 
 <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
     <div asp-validation-summary="All" class="text-danger"></div>

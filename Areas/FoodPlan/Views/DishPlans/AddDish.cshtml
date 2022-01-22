@@ -1,0 +1,29 @@
+﻿@model klc_one.Areas.FoodPlan.Models.DishPlan
+
+@{
+    ViewData["Title"] = "AddDish";
+}
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddDish">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="DayOfWeek" />
+            <input type="hidden" asp-for="Comment" />
+            <input type="hidden" asp-for="PlanID" />
+
+            <div class="form-group">
+                <label class="control-label">Ret</label>
+                <input asp-for="DishID" class="form-control" list="Ingredients" />
+                <datalist id="Ingredients">
+                    @foreach (var item in ViewBag.Dishes)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </datalist>
+            </div>
+
+            @await Html.PartialAsync("~/Views/Partials/Forms/_EditSubmit.cshtml")
+        </form>
+    </div>
+</div>
+

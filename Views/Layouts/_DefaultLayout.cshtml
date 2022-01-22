@@ -2,15 +2,13 @@
 <html lang="en">
     @await Html.PartialAsync("~/Views/Partials/_Header.cshtml")
 <body>
-
     @await Html.PartialAsync("~/Views/Partials/_Menu.cshtml")
-
     <div class="container">
+        @await Html.PartialAsync("~/Views/Partials/_StatusMessage.cshtml", TempData["StatusMessage"])
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
-
     @await Html.PartialAsync("~/Views/Partials/_Footer.cshtml")
     @await RenderSectionAsync("Scripts", required: false)
 </body>

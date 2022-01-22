@@ -11,14 +11,14 @@ using klc_one.Data;
 namespace klc_one.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211202113208_Identity+Food")]
-    partial class IdentityFood
+    [Migration("20220122105411_Shoppinglist")]
+    partial class Shoppinglist
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "6.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("klc_one.Areas.FoodPlan.Models.CategoryForDish", b =>
@@ -58,6 +58,9 @@ namespace klc_one.Migrations
                     b.Property<Guid?>("CategoryForDishID")
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("Comment")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -73,7 +76,6 @@ namespace klc_one.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<string>("Procedure")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -87,26 +89,6 @@ namespace klc_one.Migrations
                         .IsUnique();
 
                     b.ToTable("Dish");
-                });
-
-            modelBuilder.Entity("klc_one.Areas.FoodPlan.Models.DishComment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<Guid>("DishID")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DishID");
-
-                    b.ToTable("Comment");
                 });
 
             modelBuilder.Entity("klc_one.Areas.FoodPlan.Models.DishIngredient", b =>
@@ -132,16 +114,25 @@ namespace klc_one.Migrations
 
             modelBuilder.Entity("klc_one.Areas.FoodPlan.Models.DishPlan", b =>
                 {
-                    b.Property<Guid>("DishID")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("PlanID")
-                        .HasColumnType("char(36)");
+                    b.Property<string>("Comment")
+                        .HasColumnType("longtext");
 
                     b.Property<int>("DayOfWeek")
                         .HasColumnType("int");
 
-                    b.HasKey("DishID", "PlanID");
+                    b.Property<Guid?>("DishID")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("PlanID")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DishID");
 
                     b.HasIndex("PlanID");
 
@@ -199,6 +190,32 @@ namespace klc_one.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Plan");
+                });
+
+            modelBuilder.Entity("klc_one.Areas.FoodPlan.Models.ShoppingList", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("double");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ShoppingList");
                 });
 
             modelBuilder.Entity("klc_one.Areas.FoodPlan.Models.Unit", b =>
@@ -476,17 +493,6 @@ namespace klc_one.Migrations
                     b.Navigation("CategoryForDish");
                 });
 
-            modelBuilder.Entity("klc_one.Areas.FoodPlan.Models.DishComment", b =>
-                {
-                    b.HasOne("klc_one.Areas.FoodPlan.Models.Dish", "Dish")
-                        .WithMany("Comments")
-                        .HasForeignKey("DishID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Dish");
-                });
-
             modelBuilder.Entity("klc_one.Areas.FoodPlan.Models.DishIngredient", b =>
                 {
                     b.HasOne("klc_one.Areas.FoodPlan.Models.Dish", "Dish")
@@ -510,15 +516,11 @@ namespace klc_one.Migrations
                 {
                     b.HasOne("klc_one.Areas.FoodPlan.Models.Dish", "Dish")
                         .WithMany("DishPlans")
-                        .HasForeignKey("DishID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DishID");
 
                     b.HasOne("klc_one.Areas.FoodPlan.Models.Plan", "Plan")
                         .WithMany("DishPlans")
-                        .HasForeignKey("PlanID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PlanID");
 
                     b.Navigation("Dish");
 
@@ -592,8 +594,6 @@ namespace klc_one.Migrations
 
             modelBuilder.Entity("klc_one.Areas.FoodPlan.Models.Dish", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("DishIngredients");
 
                     b.Navigation("DishPlans");

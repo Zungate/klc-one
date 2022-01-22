@@ -1,8 +1,9 @@
 ﻿using klc_one.Areas.FoodPlan.Models;
-using klc_one.Areas.FoodPlan.Models.ViewModels;
+using klc_one.Areas.FoodPlan.Models.DTO;
 using klc_one.Areas.FoodPlan.Repositories.Interfaces;
 using klc_one.Data;
 using klc_one.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace klc_one.Areas.FoodPlan.Controllers
 {
     [Area("FoodPlan")]
+    [Authorize(Policy = "FoodAdmin")]
     public class IngredientsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -31,14 +33,16 @@ namespace klc_one.Areas.FoodPlan.Controllers
         {
             var ingredients = _ingredientRepository.GetAll();
 
-            ingredients = _ingredientRepository.Search(ingredients, search);
-            ingredients = _repository.Filter(ingredients, filter);
+            if (!string.IsNullOrEmpty(search))
+                ingredients = _ingredientRepository.Search(ingredients, search);
+            if (!string.IsNullOrEmpty(filter))
+                ingredients = _repository.Filter(ingredients, filter);
 
             var pageSize = _configuration.GetSection("Pagination").GetValue<int>("PageSize");
             ViewData["Categories"] = await _context.CategoryForIngredient.ToArrayAsync();
             ViewData["Search"] = search;
 
-            return View(PaginatedList<IngredientListingViewModel>.Create(await ConvertItemlistToViewModel(ingredients), page ?? 1, pageSize));
+            return View(PaginatedList<IngredientListDTO>.Create(await ConvertItemlistToViewModel(ingredients), page ?? 1, pageSize));
         }
 
         // GET: FoodPlan/Ingredients/Details/5
@@ -140,21 +144,21 @@ namespace klc_one.Areas.FoodPlan.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task<IQueryable<IngredientListingViewModel>> ConvertItemlistToViewModel(IQueryable<Ingredient> items)
+        private async Task<IQueryable<IngredientListDTO>> ConvertItemlistToViewModel(IQueryable<Ingredient> items)
         {
-            var viewmodelList = new List<IngredientListingViewModel>();
+            var dtos = new List<IngredientListDTO>();
             await items.ForEachAsync(item =>
             {
-                var viewmodel = new IngredientListingViewModel
+                var dto = new IngredientListDTO
                 {
                     Id = item.Id,
                     Name = item.Name,
                     DeletedAt = item.DeletedAt,
                     Category = item.CategoryForIngredient.Name
                 };
-                viewmodelList.Add(viewmodel);
+                dtos.Add(dto);
             });
-            return viewmodelList.AsQueryable();
+            return dtos.AsQueryable();
         }
     }
 }

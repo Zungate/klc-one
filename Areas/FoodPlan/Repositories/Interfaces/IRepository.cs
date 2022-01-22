@@ -13,5 +13,6 @@ public interface IRepository<T> where T : BaseModel
     public Task<bool> ToggleActive(Guid id);
     public Task<bool> PermaDeleteAsync(Guid id);
     public IQueryable<T> Filter(IQueryable<T> items, string filter);
+    public IQueryable<T> Search(IQueryable<T> items, string search);
 }
 

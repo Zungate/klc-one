@@ -1,32 +1,45 @@
-﻿<header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject IAuthorizationService AuthorizationService
+@inject SignInManager<AppUser> SignInManager
+<header class="mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Portfolio</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand text-warning" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav flex-grow-1">
+                    <!-- Foodplan start-->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Admin
+                        <a class="nav-link dropdown-toggle" href="#" id="foodDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Madplan
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li class="dropdown-item">
-                                <a class="nav-link text-dark" href="/FoodPlan/Dishes">Retter</a>
-                                <a class="nav-link text-dark" href="/FoodPlan/Ingredients">Ingredienser</a>
-                            </li>
-
+                        <ul class="dropdown-menu" aria-labelledby="Dropdown">
+                            <li><div class="dropdown-header">RETTER</div></li>
+                            <li><a class="dropdown-item" href="/FoodPlan/Dishes">Oversigt</a></li>
+                            @if ((await AuthorizationService.AuthorizeAsync(User, "FoodAdmin")).Succeeded)
+                            {
+                                <li><a class="dropdown-item" href="/FoodPlan/Dishes/Create">Opret</a></li>
+                                <li><a class="dropdown-item" href="/FoodPlan/CategoryForDishes">Kategori</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><div class="dropdown-header">INGREDIENSER</div></li>
+                                <li><a class="dropdown-item" href="/FoodPlan/Ingredients">Oversigt</a></li>
+                                <li><a class="dropdown-item" href="/FoodPlan/Ingredients/Create">Opret</a></li>
+                                <li><a class="dropdown-item" href="/FoodPlan/CategoryForIngredients">Kategori</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><div class="dropdown-header">ANDET</div></li>
+                                <li><a class="dropdown-item" href="/FoodPlan/Units">Enheder</a></li>
+                            }
+                            <li><a class="dropdown-item" href="/FoodPlan/ShoppingLists">Indkøbsseddel</a></li>
                         </ul>
                     </li>
-                    @*                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>*@
-
+                    <!-- Foodplan End-->
                 </ul>
                 @await Html.PartialAsync("~/Views/Partials/_Login.cshtml")
             </div>
         </div>
     </nav>
 </header>
+

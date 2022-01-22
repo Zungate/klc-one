@@ -275,7 +275,9 @@ namespace klc_one.Migrations
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Procedure = table.Column<string>(type: "longtext", nullable: false)
+                    Procedure = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Comment = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CategoryForDishID = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
                     Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
@@ -319,49 +321,29 @@ namespace klc_one.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Comment",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Body = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DishID = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Comment", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Comment_Dish_DishID",
-                        column: x => x.DishID,
-                        principalTable: "Dish",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "DishPlan",
                 columns: table => new
                 {
-                    DishID = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    PlanID = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    DayOfWeek = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    DayOfWeek = table.Column<int>(type: "int", nullable: false),
+                    Comment = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DishID = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    PlanID = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DishPlan", x => new { x.DishID, x.PlanID });
+                    table.PrimaryKey("PK_DishPlan", x => x.Id);
                     table.ForeignKey(
                         name: "FK_DishPlan_Dish_DishID",
                         column: x => x.DishID,
                         principalTable: "Dish",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_DishPlan_Plan_PlanID",
                         column: x => x.PlanID,
                         principalTable: "Plan",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -443,11 +425,6 @@ namespace klc_one.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comment_DishID",
-                table: "Comment",
-                column: "DishID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Dish_CategoryForDishID",
                 table: "Dish",
                 column: "CategoryForDishID");
@@ -461,6 +438,11 @@ namespace klc_one.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_DishIngredient_DishID",
                 table: "DishIngredient",
+                column: "DishID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DishPlan_DishID",
+                table: "DishPlan",
                 column: "DishID");
 
             migrationBuilder.CreateIndex(
@@ -502,9 +484,6 @@ namespace klc_one.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
-
-            migrationBuilder.DropTable(
-                name: "Comment");
 
             migrationBuilder.DropTable(
                 name: "DishIngredient");

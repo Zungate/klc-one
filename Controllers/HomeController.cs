@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace klc_one.Controllers;
 public class HomeController : Controller
@@ -27,16 +28,16 @@ public class HomeController : Controller
             .Where(x => x.Active)
             .FirstOrDefaultAsync();
 
-        plan.DishPlans = plan.DishPlans.OrderBy(x => ((int)x.DayOfWeek + 6) % 7).ToList();
-
-        await GenerateRoles();
-        await FoodplanSeed(_context);
+        if (plan != null)
+            plan.DishPlans = plan.DishPlans.OrderBy(x => ((int)x.DayOfWeek + 6) % 7).ToList();
 
         return View(plan);
     }
 
-    public IActionResult Privacy()
+    public async Task<IActionResult> Privacy()
     {
+        await GenerateRoles();
+        await FoodplanSeed(_context);
         return View();
     }
 
@@ -87,18 +88,116 @@ public class HomeController : Controller
 
     public static async Task FoodplanSeed(ApplicationDbContext context)
     {
-        if (!context.CategoryForDish.Any())
-        {
-            var catsfordishes = new CategoryForDish[]
-            {
-            new CategoryForDish { Name = "Aftensmad", Id = Guid.NewGuid()},
-            new CategoryForDish { Name = "Andet", Id = Guid.NewGuid() }
-            };
+        await CreateCategoryForDish(context);
 
-            await context.CategoryForDish.AddRangeAsync(catsfordishes);
-            context.SaveChanges();
+        // await CreateDishes(context);
+
+        await CreateCategoryForIngredient(context);
+
+        await CreateIngredients(context);
+        await CreateUnits(context);
+
+        var myCI = new CultureInfo("da-DK");
+        var myCal = myCI.Calendar;
+
+        await CreatePlan(context, myCI, myCal);
+    }
+
+    private static async Task CreatePlan(ApplicationDbContext context, CultureInfo myCI, Calendar myCal)
+    {
+        // Gets the DTF properties required by GetWeekOfYear.
+        var myCWR = myCI.DateTimeFormat.CalendarWeekRule;
+        var myFirstDOW = myCI.DateTimeFormat.FirstDayOfWeek;
+        var currentWeek = myCal.GetWeekOfYear(DateTime.Now, myCWR, myFirstDOW);
+        var currentYear = myCal.GetYear(DateTime.Now);
+
+        if (!context.Plan.Where(p => p.Week == currentWeek && p.Year == currentYear).Any())
+        {
+            var plan = new Plan
+            {
+                Id = new Guid(),
+                Active = true,
+                Week = currentWeek,
+                Year = currentYear,
+            };
+            await context.Plan.AddAsync(plan);
+
+            for (var i = 0; i < 7; i++)
+            {
+                var dishplan = new DishPlan
+                {
+                    Id = new Guid(),
+                    DayOfWeek = (DayOfWeek)i,
+                    PlanID = plan.Id
+                };
+                await context.DishPlan.AddAsync(dishplan);
+            }
         }
 
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task CreateUnits(ApplicationDbContext context)
+    {
+        if (!context.Unit.Any())
+        {
+            var units = new List<Unit>()
+            {
+                new Unit { Name = ""},
+                new Unit { Name = "stk."},
+                new Unit { Name = "ps."},
+                new Unit { Name = "ds."},
+                new Unit { Name = "g."},
+                new Unit { Name = "kg."},
+                new Unit { Name = "dl."},
+                new Unit { Name = "l."},
+                new Unit { Name = "tsk."},
+                new Unit { Name = "spsk."},
+            };
+            await context.Unit.AddRangeAsync(units);
+            context.SaveChanges();
+        }
+    }
+
+    private static async Task CreateIngredients(ApplicationDbContext context)
+    {
+        if (!context.Ingredient.Any())
+        {
+            var ingredients = new Ingredient[]
+            {
+                new Ingredient { Id = Guid.NewGuid(), Name="Kartofler", CategoryForIngredientID = context.CategoryForIngredient.FirstOrDefault(x => x.Name == "Frugt & Grønt").Id },
+                new Ingredient { Id = Guid.NewGuid(), Name="Hakket svin og kalv", CategoryForIngredientID = context.CategoryForIngredient.FirstOrDefault(x => x.Name == "Køl").Id },
+                new Ingredient { Id = Guid.NewGuid(), Name="Mælk", CategoryForIngredientID = context.CategoryForIngredient.FirstOrDefault(x => x.Name == "Mejeri").Id },
+                new Ingredient { Id = Guid.NewGuid(), Name="Majskolber", CategoryForIngredientID = context.CategoryForIngredient.FirstOrDefault(x => x.Name == "Frost").Id },
+                new Ingredient { Id = Guid.NewGuid(), Name="Müsli", CategoryForIngredientID = context.CategoryForIngredient.FirstOrDefault(x => x.Name == "Kolonial").Id },
+            };
+            await context.Ingredient.AddRangeAsync(ingredients);
+            context.SaveChanges();
+        }
+    }
+
+    private static async Task CreateCategoryForIngredient(ApplicationDbContext context)
+    {
+        if (!context.CategoryForIngredient.Any())
+        {
+            var categories = new CategoryForIngredient[]
+            {
+            new CategoryForIngredient { Name = "Brød", Id = Guid.NewGuid(), Priority = 1, CreatedAt = DateTime.Now},
+            new CategoryForIngredient { Name = "Frugt & Grønt", Id=Guid.NewGuid(), Priority = 2, CreatedAt = DateTime.Now},
+            new CategoryForIngredient { Name = "Frost", Id =Guid.NewGuid(), Priority = 3, CreatedAt = DateTime.Now},
+            new CategoryForIngredient { Name = "Køl", Id = Guid.NewGuid(),Priority = 4, CreatedAt = DateTime.Now},
+            new CategoryForIngredient { Name = "Mejeri", Id = Guid.NewGuid(),Priority = 5, CreatedAt = DateTime.Now},
+            new CategoryForIngredient { Name = "Kolonial", Id = Guid.NewGuid(), Priority = 6, CreatedAt = DateTime.Now},
+            new CategoryForIngredient { Name = "Andet", Id = Guid.NewGuid(), Priority = 7, CreatedAt = DateTime.Now},
+            new CategoryForIngredient { Name = "Basislager", Id = Guid.NewGuid(), Priority = 8, CreatedAt = DateTime.Now}
+            };
+            await context.CategoryForIngredient.AddRangeAsync(categories);
+            context.SaveChanges();
+        }
+    }
+
+    private static async Task CreateDishes(ApplicationDbContext context)
+    {
         if (!context.Dish.Any())
         {
             var dishList = new List<Dish>();
@@ -120,67 +219,20 @@ public class HomeController : Controller
             await context.Dish.AddRangeAsync(dishList);
             context.SaveChanges();
         }
+    }
 
-        if (!context.CategoryForIngredient.Any())
+    private static async Task CreateCategoryForDish(ApplicationDbContext context)
+    {
+        if (!context.CategoryForDish.Any())
         {
-            var categories = new CategoryForIngredient[]
+            var catsfordishes = new CategoryForDish[]
             {
-            new CategoryForIngredient { Name = "Brød", Id = Guid.NewGuid(), Priority = 1, CreatedAt = DateTime.Now},
-            new CategoryForIngredient { Name = "Frugt & Grønt", Id=Guid.NewGuid(), Priority = 2, CreatedAt = DateTime.Now},
-            new CategoryForIngredient { Name = "Frost", Id =Guid.NewGuid(), Priority = 3, CreatedAt = DateTime.Now},
-            new CategoryForIngredient { Name = "Køl", Id = Guid.NewGuid(),Priority = 4, CreatedAt = DateTime.Now},
-            new CategoryForIngredient { Name = "Mejeri", Id = Guid.NewGuid(),Priority = 5, CreatedAt = DateTime.Now},
-            new CategoryForIngredient { Name = "Kolonial", Id = Guid.NewGuid(), Priority = 6, CreatedAt = DateTime.Now},
-            new CategoryForIngredient { Name = "Andet", Id = Guid.NewGuid(), Priority = 7, CreatedAt = DateTime.Now}
+            new CategoryForDish { Name = "Aftensmad", Id = Guid.NewGuid()},
+            new CategoryForDish { Name = "Andet", Id = Guid.NewGuid() }
             };
-            await context.CategoryForIngredient.AddRangeAsync(categories);
+
+            await context.CategoryForDish.AddRangeAsync(catsfordishes);
             context.SaveChanges();
         }
-
-        if (!context.Ingredient.Any())
-        {
-            var ingredients = new Ingredient[]
-            {
-                new Ingredient { Id = Guid.NewGuid(), Name="Kartofler", CategoryForIngredientID = context.CategoryForIngredient.FirstOrDefault(x => x.Name == "Frugt & Grønt").Id },
-                new Ingredient { Id = Guid.NewGuid(), Name="Hakket svin og kalv", CategoryForIngredientID = context.CategoryForIngredient.FirstOrDefault(x => x.Name == "Køl").Id },
-                new Ingredient { Id = Guid.NewGuid(), Name="Mælk", CategoryForIngredientID = context.CategoryForIngredient.FirstOrDefault(x => x.Name == "Mejeri").Id },
-                new Ingredient { Id = Guid.NewGuid(), Name="Majskolber", CategoryForIngredientID = context.CategoryForIngredient.FirstOrDefault(x => x.Name == "Frost").Id },
-                new Ingredient { Id = Guid.NewGuid(), Name="Müsli", CategoryForIngredientID = context.CategoryForIngredient.FirstOrDefault(x => x.Name == "Kolonial").Id },
-            };
-            await context.Ingredient.AddRangeAsync(ingredients);
-            context.SaveChanges();
-        }
-        if (!context.Unit.Any())
-        {
-            var units = new List<Unit>()
-            {
-                new Unit { Name = ""},
-                new Unit { Name = "stk."},
-                new Unit { Name = "ps."},
-                new Unit { Name = "ds."},
-                new Unit { Name = "g."},
-                new Unit { Name = "kg."},
-                new Unit { Name = "dl."},
-                new Unit { Name = "l."},
-                new Unit { Name = "tsk."},
-                new Unit { Name = "spsk."},
-            };
-            await context.Unit.AddRangeAsync(units);
-            context.SaveChanges();
-        }
-
-        if (!context.Plan.Any())
-        {
-            var plan = new Plan
-            {
-                Active = true,
-                Week = 48,
-                Year = 2021,
-            };
-            await context.Plan.AddAsync(plan);
-            context.SaveChanges();
-        }
-
-
     }
 }

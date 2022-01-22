@@ -5,54 +5,77 @@
 }
 <div>
     <hr />
-    <div class="accordion" id="accordionDetails">
-        <!-- Beskrivelse -->
-        <div class="accordion-item">
-            <h2 class="accordion-header bg-primary text-white" id="descriptionHeader">
-                <button class="accordion-button bg-primary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#description" aria-expanded="true" aria-controls="description">
-                    Beskrivelse
-                </button>
-            </h2>
-            <div id="description" class="accordion-collapse collapse show" aria-labelledby="descriptionHeader">
-                <div class="accordion-body">
-                    @Html.DisplayFor(modelItem => Model.Description)
+    <div class="accordion accordion-flush" id="accordionDetails">
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <!-- Beskrivelse -->
+            <div class="accordion-item mb-4">
+                <h2 class="accordion-header" id="descriptionHeader">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#description" aria-expanded="true" aria-controls="description">
+                        <h3>Beskrivelse</h3>
+                    </button>
+                </h2>
+                <div id="description" class="accordion-collapse collapse show" aria-labelledby="descriptionHeader">
+                    <div class="accordion-body">
+                        @Html.Raw(@Model.Description)
+                    </div>
                 </div>
             </div>
-        </div>
+        }
         <!-- Ingredienser -->
-        <div class="accordion-item">
-            <h2 class="accordion-header bg-primary text-white" id="ingredientsHeader">
-                <button class="accordion-button bg-primary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#ingredients" aria-expanded="true" aria-controls="ingredients">
-                    Ingredienser
-                </button>
-            </h2>
-            <div id="ingredients" class="accordion-collapse collapse show" aria-labelledby="ingredientsHeader">
-                <div class="accordion-body">
-                    <ul>
-                        @foreach (var item in @Model.DishIngredients)
-                        {
-                            <li>@item.Amount @item.Unit - @item.Ingredient.Name</li>
-                        }
-                    </ul>
+        @if (Model.DishIngredients.Count != 0)
+        {
+            <div class="accordion-item mb-4">
+                <h2 class="accordion-header" id="ingredientsHeader">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ingredients" aria-expanded="true" aria-controls="ingredients">
+                        <h3>Ingredienser</h3>
+                    </button>
+                </h2>
+                <div id="ingredients" class="accordion-collapse collapse show" aria-labelledby="ingredientsHeader">
+                    <div class="accordion-body">
+                        <ul class="list-unstyled">
+                            @foreach (var item in @Model.DishIngredients)
+                            {
+                                <li>@item.Amount @item.Unit @item.Ingredient.Name</li>
+                            }
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
+        }
         <!-- Fremgangsmåde -->
-        <div class="accordion-item">
-            <h2 class="accordion-header bg-primary text-white" id="procedureHeader">
-                <button class="accordion-button bg-primary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#procedure" aria-expanded="true" aria-controls="procedure">
-                    Fremgangsmåde
-                </button>
-            </h2>
-            <div id="procedure" class="accordion-collapse collapse show" aria-labelledby="procedureHeader">
-                <div class="accordion-body">
-                    @Html.DisplayFor(modelItem => Model.Procedure)
+        @if (!string.IsNullOrEmpty(Model.Procedure))
+        {
+            <div class="accordion-item mb-4">
+                <h2 class="accordion-header" id="procedureHeader">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#procedure" aria-expanded="true" aria-controls="procedure">
+                        <h3>Fremgangsmåde</h3>
+                    </button>
+                </h2>
+                <div id="procedure" class="accordion-collapse collapse show" aria-labelledby="procedureHeader">
+                    <div class="accordion-body">
+                        @Html.Raw(@Model.Procedure)
+                    </div>
                 </div>
             </div>
-        </div>
+        }
+
+        <!-- Fremgangsmåde -->
+        @if (!string.IsNullOrEmpty(Model.Comment))
+        {
+            <div class="accordion-item mb-4">
+                <h2 class="accordion-header" id="commentHeader">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#comment" aria-expanded="true" aria-controls="comment">
+                        <h3>Kommentar</h3>
+                    </button>
+                </h2>
+                <div id="comment" class="accordion-collapse collapse show" aria-labelledby="commentHeader">
+                    <div class="accordion-body">
+                        @Html.Raw(@Model.Comment)
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </div>
-
-
-
 @await Html.PartialAsync("~/Views/Partials/Forms/_DetailsFooter.cshtml", Model)

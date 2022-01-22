@@ -24,10 +24,10 @@ public class DishRepository : IDishRepository
     public async Task<Dish?> GetByIdAsync(Guid id)
     {
         return await _context.Dish
-            .Include(di => di.DishIngredients)
-            .ThenInclude(i => i.Ingredient)
-            .Include(dc => dc.CategoryForDish)
-            .SingleOrDefaultAsync(item => item.Id == id);
+        .Include(di => di.DishIngredients)
+        .ThenInclude(i => i.Ingredient)
+        .Include(dc => dc.CategoryForDish)
+        .SingleOrDefaultAsync(item => item.Id == id);
     }
 
     public IQueryable<Dish> Search(IQueryable<Dish> items, string search)

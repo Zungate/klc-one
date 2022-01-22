@@ -1,0 +1,19 @@
+﻿@model klc_one.Areas.FoodPlan.Models.ShoppingList
+
+@{
+    ViewData["Title"] = "Opret indkøbsseddel";
+}
+
+<h3>Er du sikker på du vil oprette ny indkøbsseddel?</h3>
+
+
+
+<div class="alert alert-dismissible alert-danger">
+    Eksisterende data vil blive slettet, inklusiv alle ændringer
+</div>
+
+<form asp-action="SaveShoppingList">
+    <input type="hidden" asp-for="Id" />
+    <input type="submit" value="Opret" class="btn btn-primary" />
+    <a asp-action="Index" class="btn btn-link ml-2">Annuller</a>
+</form>
