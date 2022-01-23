@@ -5,5 +5,5 @@ namespace klc_one.Areas.FoodPlan.Repositories.Interfaces;
 public interface IShoppingListRepository
 {
     public Task<Dictionary<string, DishIngredient>> GenerateDictionary();
-    public Task<bool> SaveShoppingList();
+    public Task<ResponseMessage> SaveShoppingList();
 }

@@ -47,11 +47,9 @@ namespace klc_one.Areas.FoodPlan.Controllers
                     TempData["StatusMessage"] = "Fejl: Ingrediensen er allerede tilknyttet retten.";
                     return RedirectToAction("AddIngredientToDish");
                 }
-                if (await _dishIngredientRepository.AddIngredientToDishAsync(dishIngredient))
-                {
-                    TempData["StatusMessage"] = "Ingrediensen er blevet tilføjet til retten.";
-                    return RedirectToAction("Edit", "Dishes", new { id = dishIngredient.DishID });
-                }
+                var result = await _dishIngredientRepository.AddIngredientToDishAsync(dishIngredient);
+                TempData["StatusMessage"] = result.Message;
+                return RedirectToAction("Edit", "Dishes", new { id = dishIngredient.DishID });
             }
 
             ViewData["Dish"] = await _dishRepository.GetByIdAsync(dishIngredient.DishID);
@@ -67,23 +65,10 @@ namespace klc_one.Areas.FoodPlan.Controllers
             if (dishIngredient == null)
                 return RedirectToAction("Error404", "Error", new { area = "" });
 
-            if (await _dishIngredientRepository.RemoveIngredientFromDishAsync(dishIngredient))
-            {
-                TempData["StatusMessage"] = "Ingrediensen er fjernet fra retten.";
-                return RedirectToAction("Edit", "Dishes", new { id = dishIngredient.DishID });
-            }
-            else
-            {
-                var dish = await _dishRepository.GetByIdAsync(dishID);
-
-                if (dish == null)
-                    return RedirectToAction("Error404", "Error", new { area = "" });
-
-                ViewData["Dish"] = dish;
-                ViewData["Ingredients"] = _context.Ingredient;
-                ViewData["Units"] = new SelectList(_context.Unit, "Name", "Name");
-                return View();
-            }
+            var result = await _dishIngredientRepository.RemoveIngredientFromDishAsync(dishIngredient);
+            TempData["StatusMessage"] = result.Message;
+            return RedirectToAction("Edit", "Dishes", new { id = dishIngredient.DishID });
         }
+
     }
 }

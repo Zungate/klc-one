@@ -62,8 +62,8 @@ public class CategoryForDishesController : Controller
     {
         if (ModelState.IsValid)
         {
-            if (await _repository.CreateAsync(categoryForDish))
-                TempData["StatusMessage"] = "Kategorien blev oprettet";
+            var result = await _repository.CreateAsync(categoryForDish);
+            TempData["StatusMessage"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
         return View(categoryForDish);
@@ -95,15 +95,15 @@ public class CategoryForDishesController : Controller
         {
             try
             {
-                if (await _repository.UpdateAsync(categoryForDish))
-                    TempData["StatusMessage"] = "Retten blev opdateret";
+                var result = await _repository.UpdateAsync(categoryForDish);
+                TempData["StatusMessage"] = result.Message;
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (await _repository.GetByIdAsync(id) == null)
                     return RedirectToAction("Error404", "Error", new { area = "" });
                 else
-                    throw;
+                    TempData["StatusMessage"] = $"Fejl: {ex.Message}";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -117,14 +117,8 @@ public class CategoryForDishesController : Controller
 
         if (dish == null)
             return RedirectToAction("Error404", "Error", new { area = "" });
-
-        if (await _repository.ToggleActive(id))
-        {
-            var status = dish.DeletedAt == null ? "genoprettet" : "arkiveret";
-            TempData["StatusMessage"] = $"Kategorien er {status}";
-        }
-        else
-            TempData["StatusMessage"] = "Fejl: Noget gik galt. Prøv igen eller kontakt en administrator";
+        var result = await _repository.ToggleActive(id);
+        TempData["StatusMessage"] = result.Message;
 
         return RedirectToAction(nameof(Index));
     }

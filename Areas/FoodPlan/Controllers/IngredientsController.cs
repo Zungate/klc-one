@@ -51,9 +51,8 @@ namespace klc_one.Areas.FoodPlan.Controllers
             var ingredient = await _ingredientRepository.GetByIdAsync(id);
 
             if (ingredient == null)
-            {
                 return RedirectToAction("Error404", "Error", new { area = "" });
-            }
+
             return View(ingredient);
         }
 
@@ -71,8 +70,8 @@ namespace klc_one.Areas.FoodPlan.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await _repository.CreateAsync(ingredient))
-                    TempData["StatusMessage"] = "Ingrediensen blev oprettet";
+                var result = await _repository.CreateAsync(ingredient);
+                TempData["StatusMessage"] = result.Message;
 
                 return RedirectToAction(nameof(Index));
             }
@@ -86,9 +85,8 @@ namespace klc_one.Areas.FoodPlan.Controllers
             var ingredient = await _ingredientRepository.GetByIdAsync(id);
 
             if (ingredient == null)
-            {
                 return RedirectToAction("Error404", "Error", new { area = "" });
-            }
+
 
             ViewData["CategoryForIngredientID"] = new SelectList(_context.CategoryForIngredient, "Id", "Name", ingredient.CategoryForIngredientID);
             return View(ingredient);
@@ -110,15 +108,15 @@ namespace klc_one.Areas.FoodPlan.Controllers
             {
                 try
                 {
-                    if (await _repository.UpdateAsync(ingredient))
-                        TempData["StatusMessage"] = "Ingrediensen blev opdateret";
+                    var result = await _repository.UpdateAsync(ingredient);
+                    TempData["StatusMessage"] = result.Message;
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
-                    if (await _ingredientRepository.GetByIdAsync(id) == null)
+                    if (await _repository.GetByIdAsync(id) == null)
                         return RedirectToAction("Error404", "Error", new { area = "" });
                     else
-                        throw;
+                        TempData["StatusMessage"] = $"Fejl: {ex.Message}";
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -133,13 +131,8 @@ namespace klc_one.Areas.FoodPlan.Controllers
             if (ingredient == null)
                 return RedirectToAction("Error404", "Error", new { area = "" });
 
-            if (await _repository.ToggleActive(id))
-            {
-                var status = ingredient.DeletedAt == null ? "genoprettet" : "arkiveret";
-                TempData["StatusMessage"] = $"Ingrediensen er {status}";
-            }
-            else
-                TempData["StatusMessage"] = "Fejl: Noget gik galt. Prøv igen eller kontakt en administrator";
+            var result = await _repository.ToggleActive(id);
+            TempData["StatusMessage"] = result.Message;
 
             return RedirectToAction(nameof(Index));
         }

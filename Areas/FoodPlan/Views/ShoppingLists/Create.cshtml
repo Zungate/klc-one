@@ -1,21 +1,21 @@
 ﻿@model klc_one.Areas.FoodPlan.Models.ShoppingList
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Tilføj ingredients til indkøbsseddel";
 }
-
-<h1>Create</h1>
-
-<h4>ShoppingList</h4>
-<hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <label class="control-label">Ingrediens</label>
+                <input asp-for="Name" class="form-control" list="Ingredients" />
+                <datalist id="Ingredients">
+                    @foreach (var item in ViewBag.Ingredients)
+                    {
+                        <option value="@item.Name">@item.Name</option>
+                    }
+                </datalist>
             </div>
             <div class="form-group">
                 <label asp-for="Amount" class="control-label"></label>
@@ -24,8 +24,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Unit" class="control-label"></label>
-                <input asp-for="Unit" class="form-control" />
-                <span asp-validation-for="Unit" class="text-danger"></span>
+                <select asp-for="Unit" class="form-control" asp-items="ViewBag.Units"></select>
             </div>
             <div class="form-group">
                 <label asp-for="Category" class="control-label"></label>
@@ -34,6 +33,9 @@
 
             @await Html.PartialAsync("~/Views/Partials/Forms/_CreateSubmit.cshtml")
         </form>
+    </div>
+    <div class="col-md-4">
+        <a asp-action="Create" asp-controller="Ingredients" class="btn btn-primary">Tilføj ny ingrediens</a>
     </div>
 </div>
 

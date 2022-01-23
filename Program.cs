@@ -2,7 +2,6 @@ using klc_one.Areas.FoodPlan.Repositories;
 using klc_one.Areas.FoodPlan.Repositories.Interfaces;
 using klc_one.Data;
 using klc_one.Models;
-using klc_one.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -64,7 +63,6 @@ builder.Services.AddScoped<IDishRepository, DishRepository>();
 builder.Services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
 builder.Services.AddScoped<IDishIngredientRepository, DishIngredientRepository>();
 builder.Services.AddScoped<IIngredientRepository, IngredientRepository>();
-builder.Services.AddScoped<ISlugifier, Slugifier>();
 
 builder.Services.AddControllersWithViews();
 

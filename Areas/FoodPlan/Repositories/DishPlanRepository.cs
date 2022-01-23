@@ -19,7 +19,7 @@ public class DishPlanRepository : IDishPlanRepository
         return await _context.DishPlan.Where(x => x.Id == Id).FirstOrDefaultAsync();
     }
 
-    public async Task<bool> MoveDishAsync(Guid Id, string direction)
+    public async Task<ResponseMessage> MoveDishAsync(Guid Id, string direction)
     {
         var dish1 = await GetDishPlanAsync(Id);
         var dish2 = new DishPlan();
@@ -47,44 +47,55 @@ public class DishPlanRepository : IDishPlanRepository
         var b = (int)dish2.DayOfWeek;
 
         //Swap the numbers
-        a = a + b;
-        b = a - b;
-        a = a - b;
+        //a= 25, b=16
+        a = a + b; //  a = 41
+        b = a - b; // b = 41-16 = 25
+        a = a - b; // a = 41-25 = 16
 
         dish1.DayOfWeek = (DayOfWeek)a;
         dish2.DayOfWeek = (DayOfWeek)b;
 
         var updated = await _context.SaveChangesAsync();
 
-        return updated > 0;
+
+        if (updated > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"Retten blev flyttet");
+
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt");
     }
 
-    public async Task<bool> AddCommentAsync(DishPlan dishplan)
+    public async Task<ResponseMessage> AddCommentAsync(DishPlan dishplan)
     {
         if (dishplan == null)
-            return false;
+            return new ResponseMessage(StatusCodes.Status404NotFound, "Fejl: Objektet kan ikke være null. Kontakt Kenneth.");
 
         _context.Update(dishplan);
 
         var updated = await _context.SaveChangesAsync();
 
-        return updated > 0;
+        if (updated > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"Kommentaren blev tilføjet");
+
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt");
     }
 
-    public async Task<bool> RemoveCommentAsync(DishPlan dishplan)
+    public async Task<ResponseMessage> RemoveCommentAsync(DishPlan dishplan)
     {
         if (dishplan == null)
-            return false;
+            return new ResponseMessage(StatusCodes.Status404NotFound, "Fejl: Objektet kan ikke være null. Kontakt Kenneth.");
 
         dishplan.Comment = null;
         _context.Update(dishplan);
 
         var updated = await _context.SaveChangesAsync();
 
-        return updated > 0;
+        if (updated > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"Kommentaren blev fjernet");
+
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt");
     }
 
-    public async Task<bool> AddEmptyWeekAsync()
+    public async Task<ResponseMessage> AddEmptyWeekAsync()
     {
         var myCI = new CultureInfo("da-DK");
         var myCal = myCI.Calendar;
@@ -119,35 +130,41 @@ public class DishPlanRepository : IDishPlanRepository
             }
         }
         else
-            return false;
+            return new ResponseMessage(StatusCodes.Status404NotFound, "Der eksisterer allerede en plan for den uge.");
 
         var updated = await _context.SaveChangesAsync();
+        if (updated > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"Planen blev oprettet");
 
-        return updated > 0;
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt");
     }
 
-    public async Task<bool> AddDishAsync(DishPlan dishplan)
+    public async Task<ResponseMessage> AddDishAsync(DishPlan dishplan)
     {
         if (dishplan == null)
-            return false;
+            return new ResponseMessage(StatusCodes.Status404NotFound, "Fejl: Objektet kan ikke være null. Kontakt Kenneth.");
 
         _context.Update(dishplan);
 
         var updated = await _context.SaveChangesAsync();
+        if (updated > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"Retten blev tilføjet");
 
-        return updated > 0;
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt");
     }
 
-    public async Task<bool> RemoveDishAsync(DishPlan dishplan)
+    public async Task<ResponseMessage> RemoveDishAsync(DishPlan dishplan)
     {
         if (dishplan == null)
-            return false;
+            return new ResponseMessage(StatusCodes.Status404NotFound, "Fejl: Objektet kan ikke være null. Kontakt Kenneth.");
 
         dishplan.DishID = null;
         _context.Update(dishplan);
 
         var updated = await _context.SaveChangesAsync();
+        if (updated > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"Retten blev tilføjet");
 
-        return updated > 0;
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt");
     }
 }

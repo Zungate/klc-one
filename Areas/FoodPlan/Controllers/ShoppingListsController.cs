@@ -35,6 +35,8 @@ namespace klc_one.Areas.FoodPlan.Controllers
         [Authorize(Policy = "FoodAdmin")]
         public IActionResult Create()
         {
+            ViewData["Ingredients"] = _context.Ingredient;
+            ViewData["Units"] = new SelectList(_context.Unit, "Name", "Name");
             ViewData["CategoryForIngredientID"] = new SelectList(_context.CategoryForIngredient, "Name", "Name");
             return View();
         }
@@ -49,8 +51,8 @@ namespace klc_one.Areas.FoodPlan.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await _repository.CreateAsync(shoppingList))
-                    TempData["StatusMessage"] = "Ingrediensen blev tilføjet";
+                var result = await _repository.CreateAsync(shoppingList);
+                TempData["StatusMessage"] = result.Message;
 
                 return RedirectToAction(nameof(Index));
             }
@@ -86,15 +88,15 @@ namespace klc_one.Areas.FoodPlan.Controllers
             {
                 try
                 {
-                    if (await _repository.UpdateAsync(shoppingList))
-                        TempData["StatusMessage"] = "Retten blev opdateret";
+                    var result = await _repository.UpdateAsync(shoppingList);
+                    TempData["StatusMessage"] = result.Message;
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
                     if (await _repository.GetByIdAsync(id) == null)
                         return RedirectToAction("Error404", "Error", new { area = "" });
                     else
-                        throw;
+                        TempData["StatusMessage"] = $"Fejl: {ex.Message}";
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -120,8 +122,8 @@ namespace klc_one.Areas.FoodPlan.Controllers
         {
             var shoppingList = await _repository.GetByIdAsync(id);
 
-            if (await _repository.PermaDeleteAsync(id))
-                TempData["StatusMessage"] = "Ingrediensen blev slettet";
+            var result = await _repository.PermaDeleteAsync(id);
+            TempData["StatusMessage"] = result.Message;
 
             return RedirectToAction(nameof(Index));
         }
@@ -136,8 +138,8 @@ namespace klc_one.Areas.FoodPlan.Controllers
         [Authorize(Policy = "FoodAdmin")]
         public async Task<IActionResult> SaveShoppingList(Guid id)
         {
-            if (await _shoppingListRepository.SaveShoppingList())
-                TempData["StatusMessage"] = "Indkøbssedlen blev oprettet";
+            var result = await _shoppingListRepository.SaveShoppingList();
+            TempData["StatusMessage"] = result.Message;
 
             return RedirectToAction(nameof(Index));
         }

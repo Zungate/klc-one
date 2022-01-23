@@ -25,10 +25,8 @@ public class DishPlansController : Controller
         if (await _dishPlanRepository.GetDishPlanAsync(id) == null)
             return RedirectToAction("Error404", "Error", new { area = "" });
 
-        if (await _dishPlanRepository.MoveDishAsync(id, direction))
-            TempData["StatusMessage"] = "Retten blev flyttet";
-        else
-            TempData["StatusMessage"] = "Fejl: Noget gik galt. Prøv igen eller kontakt en administrator";
+        var result = await _dishPlanRepository.MoveDishAsync(id, direction);
+        TempData["StatusMessage"] = result.Message;
 
         return RedirectToAction("Index", "Home", new { area = "" });
     }
@@ -51,8 +49,8 @@ public class DishPlansController : Controller
         {
             try
             {
-                if (await _dishPlanRepository.AddCommentAsync(dishplan))
-                    TempData["StatusMessage"] = "Kommentaren blev tilføjet";
+                var result = await _dishPlanRepository.AddCommentAsync(dishplan);
+                TempData["StatusMessage"] = result.Message;
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -74,20 +72,16 @@ public class DishPlansController : Controller
         if (dishplan == null)
             return RedirectToAction("Error404", "Error", new { area = "" });
 
-        if (await _dishPlanRepository.RemoveCommentAsync(dishplan))
-            TempData["StatusMessage"] = "Kommentaren blev fjernet";
-        else
-            TempData["StatusMessage"] = "Fejl: Noget gik galt. Prøv igen eller kontakt en administrator";
+        var result = await _dishPlanRepository.RemoveCommentAsync(dishplan);
+        TempData["StatusMessage"] = result.Message;
 
         return RedirectToAction("Index", "Home", new { area = "" });
     }
 
     public async Task<IActionResult> AddEmptyWeek()
     {
-        if (await _dishPlanRepository.AddEmptyWeekAsync())
-            TempData["StatusMessage"] = "En tom uge er blevet tilføjet";
-        else
-            TempData["StatusMessage"] = "Fejl: Noget gik galt. Prøv igen eller kontakt en administrator";
+        var result = await _dishPlanRepository.AddEmptyWeekAsync();
+        TempData["StatusMessage"] = result.Message;
 
         return RedirectToAction("Index", "Home", new { area = "" });
     }
@@ -111,15 +105,15 @@ public class DishPlansController : Controller
         {
             try
             {
-                if (await _dishPlanRepository.AddCommentAsync(dishplan))
-                    TempData["StatusMessage"] = "Retten blev tilføjet";
+                var result = await _dishPlanRepository.AddCommentAsync(dishplan);
+                TempData["StatusMessage"] = result.Message;
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (await _dishPlanRepository.GetDishPlanAsync(Id) == null)
                     return RedirectToAction("Error404", "Error", new { area = "" });
                 else
-                    throw;
+                    TempData["StatusMessage"] = $"Fejl: {ex.Message}";
             }
             return RedirectToAction("Index", "Home", new { area = "" });
         }
@@ -134,8 +128,8 @@ public class DishPlansController : Controller
         if (dishplan == null)
             return RedirectToAction("Error404", "Error", new { area = "" });
 
-        if (await _dishPlanRepository.RemoveDishAsync(dishplan))
-            TempData["StatusMessage"] = "Retten blev fjernet";
+        var result = await _dishPlanRepository.RemoveDishAsync(dishplan);
+        TempData["StatusMessage"] = result.Message;
 
         return RedirectToAction("Index", "Home", new { area = "" });
     }

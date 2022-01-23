@@ -18,19 +18,25 @@ public class DishIngredientRepository : IDishIngredientRepository
         return await _context.DishIngredient.FirstOrDefaultAsync(x => x.DishID == dishId && x.IngredientID == ingredientId);
     }
 
-    public async Task<bool> AddIngredientToDishAsync(DishIngredient dishIngredient)
+    public async Task<ResponseMessage> AddIngredientToDishAsync(DishIngredient dishIngredient)
     {
         _context.Add(dishIngredient);
         var added = await _context.SaveChangesAsync();
 
-        return added > 0;
+        if (added > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"Ingrediensen blev tilføjet til retten");
+
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt");
     }
 
-    public async Task<bool> RemoveIngredientFromDishAsync(DishIngredient dishIngredient)
+    public async Task<ResponseMessage> RemoveIngredientFromDishAsync(DishIngredient dishIngredient)
     {
         _context.Remove(dishIngredient);
         var removed = await _context.SaveChangesAsync();
 
-        return removed > 0;
+        if (removed > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"Ingredeiensen blev fjernet");
+
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt");
     }
 }

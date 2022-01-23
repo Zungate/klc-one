@@ -1,4 +1,5 @@
-﻿using klc_one.Areas.FoodPlan.Repositories.Interfaces;
+﻿using klc_one.Areas.FoodPlan.Models;
+using klc_one.Areas.FoodPlan.Repositories.Interfaces;
 using klc_one.Data;
 using klc_one.Models;
 using Microsoft.EntityFrameworkCore;
@@ -36,10 +37,13 @@ public class Repository<T> : IRepository<T> where T : BaseModel
         return await entities.SingleOrDefaultAsync(item => item.Id == id);
     }
 
-    public async Task<bool> CreateAsync(T item)
+    public async Task<ResponseMessage> CreateAsync(T item)
     {
         if (item == null)
-            return false;
+            return new ResponseMessage(StatusCodes.Status404NotFound, "Fejl: Objektet kan ikke være null. Kontakt Kenneth.");
+
+        if (entities.Any(x => x.Name == item.Name))
+            return new ResponseMessage(StatusCodes.Status409Conflict, $"Fejl: {item.Name} eskisterer allerede");
 
         item.CreatedAt = DateTime.Now;
         item.UpdatedAt = DateTime.Now;
@@ -47,49 +51,66 @@ public class Repository<T> : IRepository<T> where T : BaseModel
 
         var created = await _context.SaveChangesAsync();
 
-        return created > 0;
+        if (created > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"{item.Name} blev oprettet");
+
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt");
     }
 
-    public async Task<bool> UpdateAsync(T item)
+
+    public async Task<ResponseMessage> UpdateAsync(T item)
     {
         if (item == null)
-            return false;
+            return new ResponseMessage(StatusCodes.Status404NotFound, "Fejl: Objektet kan ikke være null. Kontakt Kenneth.");
 
         item.UpdatedAt = DateTime.Now;
         entities.Update(item);
 
         var updated = await _context.SaveChangesAsync();
 
-        return updated > 0;
+        if (updated > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"{item.Name} blev opdateret.");
+
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt.");
     }
 
-    public async Task<bool> ToggleActive(Guid id)
+    public async Task<ResponseMessage> ToggleActive(Guid id)
     {
         var item = await GetByIdAsync(id);
 
         if (item == null)
-            return false;
+            return new ResponseMessage(StatusCodes.Status404NotFound, "Fejl: Objektet blev ikke fundet.");
 
         if (item.DeletedAt == null)
             item.DeletedAt = DateTime.Now;
         else
             item.DeletedAt = null;
 
-        return await UpdateAsync(item);
+        var updated = await _context.SaveChangesAsync();
+        if (updated > 0)
+        {
+            var status = item.DeletedAt == null ? "genoprettet" : "arkiveret";
+            return new ResponseMessage(StatusCodes.Status200OK, $"{item.Name}'s status er {status}.");
+        }
+
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt.");
     }
 
-    public async Task<bool> PermaDeleteAsync(Guid id)
+    public async Task<ResponseMessage> PermaDeleteAsync(Guid id)
     {
         var item = await GetByIdAsync(id);
 
         if (item == null)
-            return false;
+            return new ResponseMessage(StatusCodes.Status404NotFound, "Fejl: Objektet blev ikke fundet.");
 
         entities.Remove(item);
 
         var deleted = await _context.SaveChangesAsync();
 
-        return deleted > 0;
+        if (deleted > 0)
+            return new ResponseMessage(StatusCodes.Status200OK, $"{item.Name} blev opdateret.");
+
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt.");
     }
 
     public IQueryable<T> Filter(IQueryable<T> items, string filter)

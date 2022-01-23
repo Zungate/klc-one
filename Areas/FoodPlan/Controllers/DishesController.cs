@@ -74,9 +74,9 @@ public class DishesController : Controller
     {
         if (ModelState.IsValid)
         {
-            if (await _repository.CreateAsync(dish))
-                TempData["StatusMessage"] = "Retten blev oprettet";
+            var result = await _repository.CreateAsync(dish);
 
+            TempData["StatusMessage"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
         ViewData["CategoryForDishID"] = new SelectList(_context.CategoryForDish, "Id", "Name", dish.CategoryForDishID);
@@ -111,15 +111,15 @@ public class DishesController : Controller
         {
             try
             {
-                if (await _repository.UpdateAsync(dish))
-                    TempData["StatusMessage"] = "Retten blev opdateret";
+                var result = await _repository.UpdateAsync(dish);
+                TempData["StatusMessage"] = result.Message;
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
-                if (await _dishRepository.GetByIdAsync(id) == null)
+                if (await _repository.GetByIdAsync(id) == null)
                     return RedirectToAction("Error404", "Error", new { area = "" });
                 else
-                    throw;
+                    TempData["StatusMessage"] = $"Fejl: {ex.Message}";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -135,13 +135,8 @@ public class DishesController : Controller
         if (dish == null)
             return RedirectToAction("Error404", "Error", new { area = "" });
 
-        if (await _repository.ToggleActive(id))
-        {
-            var status = dish.DeletedAt == null ? "genoprettet" : "arkiveret";
-            TempData["StatusMessage"] = $"Retten er {status}";
-        }
-        else
-            TempData["StatusMessage"] = "Fejl: Noget gik galt. Prøv igen eller kontakt en administrator";
+        var result = await _repository.ToggleActive(id);
+        TempData["StatusMessage"] = result.Message;
 
         return RedirectToAction(nameof(Index));
     }

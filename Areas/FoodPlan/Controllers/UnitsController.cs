@@ -64,8 +64,8 @@ public class UnitsController : Controller
     {
         if (ModelState.IsValid)
         {
-            if (await _repository.CreateAsync(unit))
-                TempData["StatusMessage"] = "Enheden blev oprettet";
+            var result = await _repository.CreateAsync(unit);
+            TempData["StatusMessage"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
         return View(unit);
@@ -97,15 +97,15 @@ public class UnitsController : Controller
         {
             try
             {
-                if (await _repository.UpdateAsync(unit))
-                    TempData["StatusMessage"] = "Enheden blev opdateret";
+                var result = await _repository.UpdateAsync(unit);
+                TempData["StatusMessage"] = result.Message;
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (await _repository.GetByIdAsync(id) == null)
                     return RedirectToAction("Error404", "Error", new { area = "" });
                 else
-                    throw;
+                    TempData["StatusMessage"] = $"Fejl: {ex.Message}";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -120,13 +120,9 @@ public class UnitsController : Controller
         if (dish == null)
             return RedirectToAction("Error404", "Error", new { area = "" });
 
-        if (await _repository.ToggleActive(id))
-        {
-            var status = dish.DeletedAt == null ? "genoprettet" : "arkiveret";
-            TempData["StatusMessage"] = $"Kategorien er {status}";
-        }
-        else
-            TempData["StatusMessage"] = "Fejl: Noget gik galt. Prøv igen eller kontakt en administrator";
+        var result = await _repository.ToggleActive(id);
+        TempData["StatusMessage"] = result.Message;
+
 
         return RedirectToAction(nameof(Index));
     }

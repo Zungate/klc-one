@@ -54,7 +54,7 @@ public class ShoppingListRepository : IShoppingListRepository
         return shoppingList;
     }
 
-    public async Task<bool> SaveShoppingList()
+    public async Task<ResponseMessage> SaveShoppingList()
     {
         //Empty the shoppinglist table
         _context.ShoppingList.RemoveRange(_context.ShoppingList);
@@ -72,9 +72,9 @@ public class ShoppingListRepository : IShoppingListRepository
             await _context.ShoppingList.AddRangeAsync(list);
 
             var created = await _context.SaveChangesAsync();
-
-            return created > 0;
+            if (created > 0)
+                return new ResponseMessage(StatusCodes.Status200OK, $"Indkøbslisten blev oprettet");
         }
-        return false;
+        return new ResponseMessage(StatusCodes.Status400BadRequest, "Fejl: Noget gik galt");
     }
 }
